@@ -1,0 +1,13 @@
+version: "3.10"
+
+services:
+  http_file_server:
+    build: .
+    container_name: server
+    command: python3 app.py
+    volumes:
+      - .:/code
+    # env_file:
+    #   - ./secrets/.env
+    ports:
+      - 8081:8081
