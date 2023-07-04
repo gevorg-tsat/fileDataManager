@@ -9,6 +9,7 @@ from fastapi import UploadFile, HTTPException, Query, File
 import os
 import pandas
 from typing import Annotated
+from csv import reader
 
 from config import HOST, PORT, FILES_STORAGE_DIRECTORY
 from models import ColumnData
@@ -35,7 +36,7 @@ async def root():
 
 
 @app.post("/uploadfile/")
-async def create_uploaded_file(in_file: Annotated[UploadFile, File(description="CSV file")]):
+async def uploade_file(in_file: Annotated[UploadFile, File(description="CSV file")]):
     if in_file.content_type != "text/csv":
         return HTTPException(400, detail="Wrong data type")
     out_file_path = FILES_STORAGE_DIRECTORY + "/" + in_file.filename
@@ -48,14 +49,14 @@ async def create_uploaded_file(in_file: Annotated[UploadFile, File(description="
     return {"STATUS": "OK"}
 
 @app.post("/uploadfiles")
-async def create_uploaded_files(files: list[Annotated[UploadFile, File(description="CSV file")]]):
+async def uploade_files(files: list[Annotated[UploadFile, File(description="CSV file")]]):
     for file in files:
         result = await create_uploaded_file(file)
         if isinstance(result, HTTPException):
             return result
     return {"STATUS": "OK"}
     
-@app.delete("/deletefile")
+@app.delete("/file")
 async def delete_file(filename: str):
     uploaded_files = await get_filenames()
     if filename in uploaded_files:
@@ -68,6 +69,16 @@ async def delete_file(filename: str):
 async def get_filenames() -> list[str]:
     return [f for f in os.listdir(FILES_STORAGE_DIRECTORY) if not f.startswith('.')]
 
+@app.get("/columns")
+async def get_column_names(filename: str) -> list[str]:
+    uploaded_files = await get_filenames()
+    if filename in uploaded_files:
+        # skip first line from demo.csv
+        with open(FILES_STORAGE_DIRECTORY + "/" + filename, 'r') as readObj:
+            csvReader = reader(readObj)
+            header = next(csvReader)
+            return header
+    return HTTPException(404, detail="No such file")
 
 @app.get("/file")
 async def get_file_data(
