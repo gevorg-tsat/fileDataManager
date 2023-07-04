@@ -32,7 +32,7 @@ async def root():
 
 
 @app.post("/uploadfile/")
-async def create_upload_file(in_file: UploadFile):
+async def create_uploaded_file(in_file: UploadFile):
     out_file_path = FILES_STORAGE_DIRECTORY + "/" + in_file.filename
     try:
         async with aiofiles.open(out_file_path, 'wb') as out_file:
@@ -41,6 +41,23 @@ async def create_upload_file(in_file: UploadFile):
     except:
         return HTTPException(500)
     return {"STATUS": "OK"}
+
+@app.post("/uploadfiles")
+async def create_uploaded_files(files: list[UploadFile]):
+    for file in files:
+        result = await create_uploaded_file(file)
+        if isinstance(result, HTTPException):
+            return HTTPException(500)
+    return {"STATUS": "OK"}
+    
+@app.delete("/deletefile")
+async def delete_file(filename: str):
+    uploaded_files = await get_files()
+    if filename in uploaded_files:
+        os.remove(FILES_STORAGE_DIRECTORY + "/" + filename)
+        return {"STATUS": "OK"}
+    return HTTPException(404)
+    
 
 @app.get("/files")
 async def get_files() -> list[str]:
