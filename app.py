@@ -36,7 +36,7 @@ async def root():
 
 
 @app.post("/uploadfile/")
-async def uploade_file(in_file: Annotated[UploadFile, File(description="CSV file")]):
+async def upload_file(in_file: Annotated[UploadFile, File(description="CSV file")]):
     if in_file.content_type != "text/csv":
         return HTTPException(400, detail="Wrong data type")
     out_file_path = FILES_STORAGE_DIRECTORY + "/" + in_file.filename
@@ -49,9 +49,9 @@ async def uploade_file(in_file: Annotated[UploadFile, File(description="CSV file
     return {"STATUS": "OK"}
 
 @app.post("/uploadfiles")
-async def uploade_files(files: list[Annotated[UploadFile, File(description="CSV file")]]):
+async def upload_files(files: list[Annotated[UploadFile, File(description="CSV file")]]):
     for file in files:
-        result = await create_uploaded_file(file)
+        result = await upload_file(file)
         if isinstance(result, HTTPException):
             return result
     return {"STATUS": "OK"}
