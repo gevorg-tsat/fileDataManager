@@ -49,7 +49,9 @@ async def upload_file(in_file: Annotated[UploadFile, File(description="CSV file"
     return {"STATUS": "OK"}
 
 @app.post("/uploadfiles")
-async def upload_files(files: list[Annotated[UploadFile, File(description="CSV file")]]):
+async def upload_files(files: Annotated[
+        list[UploadFile], File(description="CSV files")
+    ]):
     for file in files:
         result = await upload_file(file)
         if isinstance(result, HTTPException):
