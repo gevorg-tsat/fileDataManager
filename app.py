@@ -61,7 +61,7 @@ async def delete_file(filename: str):
 
 @app.get("/files")
 async def get_files() -> list[str]:
-    return os.listdir(FILES_STORAGE_DIRECTORY)
+    return [f for f in os.listdir(FILES_STORAGE_DIRECTORY) if not f.startswith('.')]
 
 if __name__ == "__main__":
     uvicorn.run("app:app", port=PORT, host=HOST, reload=False)
